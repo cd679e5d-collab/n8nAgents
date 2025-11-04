@@ -1,0 +1,227 @@
+{
+  "name": "Filter and IF Switch Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -96
+      ],
+      "id": "8a3a76f7-c2b5-4927-9e0b-1637f1d69634",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11qXZPEkHwiCL5RGAHn2M38v74CJebbKwDnE2_8GkVE0",
+          "mode": "list",
+          "cachedResultName": "My Customers ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11qXZPEkHwiCL5RGAHn2M38v74CJebbKwDnE2_8GkVE0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11qXZPEkHwiCL5RGAHn2M38v74CJebbKwDnE2_8GkVE0/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        -96
+      ],
+      "id": "a01ac478-534f-465f-8074-bd0562111048",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pN4HYin4Mdr5GE2T",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1890d0b8-34db-49c1-a7a0-5f48ac332e22",
+              "leftValue": "={{ $json['Payment Status'] }}",
+              "rightValue": "Paid",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        192,
+        -96
+      ],
+      "id": "186d8c74-9cca-49bd-9271-97d1770dd17d",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "078e72e9-58c5-4746-9b56-f10cdabe2c0f",
+              "leftValue": "={{ $json['Payment Status'] }}",
+              "rightValue": "Unpaid",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "d5176bff-8019-45be-b573-f1b6c5b14bad",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Customer Email'] }}",
+        "subject": "Your Invoice is due for payment",
+        "message": "=Hello  {{ $json['Customer Name'] }},\nYour invoivce is due on {{ $json['Due Date'] }}. Please make sure to settle your invoice before  {{ $json['Due Date'] }} to avoid any penalty.\nRegards,\nCircle's team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        -192
+      ],
+      "id": "57185a02-ddda-4f5a-9a40-83bceab032e1",
+      "name": "Send a message",
+      "webhookId": "ee132270-e8e9-40b3-abaf-36d9bc312a6d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KnfYc2293LJYlzpR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Customer Email'] }}",
+        "subject": "Immediate payment required for overdue invoice",
+        "message": "=Hello  {{ $json['Customer Name'] }},\nThis is the final reminder that your payment for invoice on {{ $json['Due Date'] }} is now overdue. Plaese settle this payment immediately to avoid service interruption or further action.\nRegards, \nCircle's team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        0
+      ],
+      "id": "9f1c8b39-4442-4de3-978d-c817c0566106",
+      "name": "Send a message1",
+      "webhookId": "1e565479-ffd3-4875-ba11-6aeff463f649",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "KnfYc2293LJYlzpR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "05c1b376-d4b3-40fa-8401-cebed1d9f73e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4c51f2d3b4e6f1b3dcd594ed59ba93b06fc43f91c52cbabfeacb3cd35f13207f"
+  },
+  "id": "Eo0lco4cOMKjsmU0",
+  "tags": []
+}
